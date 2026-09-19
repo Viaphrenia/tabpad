@@ -814,16 +814,49 @@
       }
     });
 
-    // Auto-populate if launched from a bookmarklet (?add_url=...&add_title=...)
+    // Auto-populate or Auto-Save if launched from a bookmarklet
     window.addEventListener('DOMContentLoaded', () => {
       const params = new URLSearchParams(window.location.search);
       const addUrl = params.get('add_url');
       const addTitle = params.get('add_title');
+      const silent = params.get('silent');
 
       if (addUrl) {
-        document.getElementById('url').value = addUrl;
-        if (addTitle) document.getElementById('title').value = decodeURIComponent(addTitle);
-        handleUrlInput(addUrl);
+        const url = addUrl;
+        let title = addTitle ? decodeURIComponent(addTitle) : '';
+        
+        // Auto-detect tags
+        const detected = [];
+        AUTO_RULES.forEach(rule => {
+          if (rule.regex.test(url)) detected.push(...rule.tags);
+        });
+
+        if (!title) {
+          const host = getHostname(url);
+          try {
+            const parsed = new URL(url);
+            title = host.replace('www.', '') + (parsed.pathname !== '/' ? parsed.pathname : '');
+          } catch {
+            title = url;
+          }
+        }
+
+        // Save directly to storage
+        links.unshift({
+          id: Date.now(),
+          createdAt: Date.now(),
+          url,
+          title,
+          tags: [...new Set(detected)]
+        });
+        save();
+
+        // If loaded inside a hidden iframe or marked silent, halt navigation
+        if (silent === 'true' || window.self !== window.top) {
+          return;
+        }
+
+        // Clean URL bar if opened in a normal tab
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     });
