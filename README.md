@@ -4,7 +4,7 @@ Visit tabpad at [https://viaphrenia.github.io/tabpad/](https://viaphrenia.github
 
 If you need it, here's a bookmarklet!
 ```javascript
-javascript:(function(){const url=encodeURIComponent(window.location.href);const title=encodeURIComponent(document.title);window.open('[https://viaphrenia.github.io/tabpad/?add_url='+url+'&add_title='+title,'_blank](https://viaphrenia.github.io/tabpad/?add_url='+url+'&add_title='+title,'_blank)');})();
+javascript:(function(){const url=encodeURIComponent(window.location.href);const title=encodeURIComponent(document.title);const iframe=document.createElement('iframe');iframe.style.display='none';iframe.src='https://viaphrenia.github.io/tabpad/?add_url='+url+'&add_title='+title+'&silent=true';document.body.appendChild(iframe);setTimeout(()=>iframe.remove(),1500);})();
 ```
 <br>
 <br>
